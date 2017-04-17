@@ -1,0 +1,79 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          wso2soa.sh
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Inicia o WSO2 Integrator no boot
+# Description:       Pemrite gerenciar o WSO2 Integrator como servico do sistema, alem de inicia-lo no boot
+### END INIT INFO
+
+PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
+nomeServico="WSO2 Integrator"
+PID_FILE="/home/core-dev-wso2soa/pid.txt"
+
+wso2_apagar_pid(){
+	if [ -e "$PID_FILE" ] ; then
+		rm $PID_FILE
+	fi
+}
+
+wso2_pid(){
+	wso2_apagar_pid
+        ps -aux | grep integrator.sh | cut -b11-14 >> $PID_FILE
+}
+
+wso2_start(){
+	/opt/wso2/wso2ei-6.0.0/bin/integrator.sh start
+	wso2_pid
+}
+
+wso2_stop(){
+        /opt/wso2/wso2ei-6.0.0/bin/integrator.sh stop
+	wso2_apagar_pid
+}
+
+wso2_restart(){
+        /opt/wso2/wso2ei-6.0.0/bin/integrator.sh stop
+	sleep 2
+        /opt/wso2/wso2ei-6.0.0/bin/integrator.sh start
+}
+
+wso2_status(){
+	if [ -e "$PID_FILE" ] ; then
+		pid=`cat $PID_FILE | head -1`
+	fi
+
+	if [ -z $pid ];
+		then
+			echo "O servico ${nomeServico} nao esta em execucao"
+		else
+			echo "O servico ${nomeServico} esta em execucao!"
+	fi
+
+#tail -n 1000 /opt/wso2/wso2ei-6.0.0/repository/logs/wso2carbon.log
+}
+
+case "$1" in
+"start")
+	echo "Iniciando o servico ${nomeServico}"
+	wso2_start
+;;
+"stop")
+	echo "Finalizando o servico ${nomeServico}"
+	wso2_stop
+;;
+"restart")
+	echo "Reiniciando o servio ${nomeServico}"
+	wso2_restart
+;;
+"status")
+	wso2_status
+;;
+*)
+echo "Opcoes de uso: $0 {start|stop|restart|status}"
+exit 1
+esac

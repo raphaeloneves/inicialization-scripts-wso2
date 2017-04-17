@@ -1,0 +1,81 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          tomcat.sh
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Inicia o Tomcat no boot
+# Description:       Permite gerenciar o tomcat como servico do SO, alem de inicia-lo no boot
+### END INIT INFO
+
+PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+export JAVA_HOME=$JAVA_HOME
+nomeServico="Apache Tomcat 7"
+PID_FILE="/home/core-dev-xds/pid.txt"
+
+tomcat_apagar_pid(){
+        if [ -e "$PID_FILE" ] ; then
+                rm $PID_FILE
+        fi
+}
+
+tomcat_pid(){
+        tomcat_apagar_pid
+        ps -aux | grep startup.sh | cut -b11-14 >> $PID_FILE
+}
+
+start_tomcat(){
+	sudo /opt/tomcat7/bin/startup.sh
+	tomcat_pid
+}
+
+stop_tomcat(){
+	sudo /opt/tomcat7/bin/shutdown.sh
+	tomcat_apagar_pid
+}
+
+restart_tomcat(){
+	stop_tomcat
+	start_tomcat
+}
+
+status_tomcat(){
+	if [ -e "$PID_FILE" ] ; then
+                pid=`cat $PID_FILE | head -1`
+        fi
+
+        if [ -z $pid ];
+                then
+                        echo "O servico ${nomeServico} nao esta em execucao"
+                else
+                        echo "O servico ${nomeServico} esta em execucao!"
+        fi
+}
+
+case "$1" in
+
+"start")
+	echo "Iniciando o servico ${nomeServico}"
+	start_tomcat
+;;
+"stop")
+	echo "Finalizando o servico ${nomeServico}"
+	stop_tomcat
+;;
+"restart")
+	echo "Reiniciando o servico ${nomeServico}"
+	stop_tomcat
+	sleep 2
+	start_tomcat
+;;
+"status")
+	status_tomcat
+;;
+*)
+
+echo "Opcoes de uso: $0 {start|stop|restart|status}"
+exit 1
+esac
+
