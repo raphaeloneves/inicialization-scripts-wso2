@@ -1,8 +1,9 @@
-# scripts-inicializacao-wso2
+# WSO2 Inicialization Scripts
 
-Script de inicialização dos seviços do WSO2.
+Those scripts were created to facilitade my daily routine with WSO2 products. They were made to be used in Linux as a service integration scripts.
 
-1) Executar chmod a+x no script de inicialização e copiar ou criar link simbólico para a pasta /etc/init.d.
-2) Para rodar os serviços:
+Before execute then, be sure to execute chmod a+x command to turn then executable. And if you wanna work with then as a Linux service, create a symbolic link into /etc/init.d and have some fun!!!!!
 
-sudo service nome_servico start|stop|restart|status
+sudo service service_name start|stop|restart|status
+
+Enjoy!
